@@ -1,6 +1,6 @@
 ﻿namespace event_train
 {
-    public class MemorableDate
+    public class MemorableDates
     {
         public int Id { get; set; }
         public DateTime EventDate { get; set; }
