@@ -12,14 +12,14 @@ using System.Text;
 var builder = WebApplication.CreateBuilder(args);
 
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
-using (ApplicationContext db = new ApplicationContext())
+/*using (ApplicationContext db = new ApplicationContext())
 {
     News news1 = new News { Id = 1, StartDate = DateTime.Parse("2024/07/04T15:41:26.495Z"), EndDate = DateTime.Parse("2024/07/04T20:41:26.495Z"), Title = "title", Content = "content", Importance = 444, Created = DateTime.Now, Author = "author" };
 
     db.News.Add(news1);
 
      db.SaveChanges();
-}
+}*/
 
 builder.Services.AddAuthorization();
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>

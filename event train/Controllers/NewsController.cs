@@ -30,25 +30,40 @@ namespace event_train.Controllers
 
         }*/
         [HttpGet(Name = "GetNews")]
-        public List<User> GetUsers()
+        public List<News> GetNews()
         {
             using (ApplicationContext db = new ApplicationContext())
             {
-                var users = db.Users.ToList();
-                return users;
+                var news = db.News.ToList();
+                return news;
             }
         }
-        [HttpPut(Name = "PutNews")]
+        /*[HttpPut(Name = "PutNews")]
         public News PutUser(int id, DateTime startDate, DateTime endDate, string title, string content, int importance, string author)
         {
             using (ApplicationContext db = new ApplicationContext())
             {
-                News news = new News { Id = id, StartDate = startDate, EndDate = endDate, Title = title, Content = content, Importance = importance,Created = DateTime.UtcNow, Author = author };
+                News news = new News { Id = id, StartDate = startDate, EndDate = endDate, Title = title, Content = content, Importance = importance, Created = DateTime.UtcNow, Author = author };
                 db.News.Add(news);
                 db.SaveChanges();
                 return news;
             }
-        }
+        }*/
+        [HttpPut(Name = "PutNews")]
+        public News PutNews(int id, DateTime startDate, DateTime endDate, string title, string content, int importance, DateTime created, string author)
+        {
+            startDate = DateTime.SpecifyKind(startDate, DateTimeKind.Utc);
+            endDate = DateTime.SpecifyKind(endDate, DateTimeKind.Utc);
+            created = DateTime.SpecifyKind(created, DateTimeKind.Utc);
 
+            using (ApplicationContext db = new ApplicationContext())
+            {
+                News news = new News { Id = id, StartDate = startDate, EndDate = endDate, Title = title, Content = content, Importance = importance, Created = created, Author = author };
+                db.News.Add(news);
+                db.SaveChanges();
+                return news;
+            }
+
+        }
     }
 }

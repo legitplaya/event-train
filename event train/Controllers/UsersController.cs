@@ -16,6 +16,7 @@ namespace event_train.Controllers
                 return users;
             }
         }
+        int? h = null;
 
         [HttpPut(Name = "PutUser")]
         public User PutUser(int id, string login, string password)
@@ -54,6 +55,8 @@ namespace event_train.Controllers
             db.Users.AddRange(user1, user2);
             db.SaveChanges();
         }*/
+
+
 
     }
 }

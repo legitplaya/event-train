@@ -10,6 +10,9 @@
         public int Importance { get; set; }
         public DateTime Created { get; set; }
         public string? Author { get; set; }
-
+        public News()
+        {
+            Created = DateTime.Now;
+        }
     }
 }
