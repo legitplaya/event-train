@@ -16,32 +16,28 @@ namespace event_train.Controllers
                 return users;
             }
         }
-        int? h = null;
 
         [HttpPut(Name = "PutUser")]
         public User PutUser(int id, string login, string password)
         {
             using (ApplicationContext db = new ApplicationContext())
             {
-                User user1 = new User { Id = id, Login = login, Password = password};
+                User user1 = new User { Id = id, Login = login, Password = password };
                 db.Users.Add(user1);
                 db.SaveChanges();
                 return user1;
             }
         }
         [HttpDelete(Name = "DeleteUser")]
-        public User PutUsers(int id)
+        public void DeleteUser(int id)
         {
             using (ApplicationContext db = new ApplicationContext())
             {
                 User user = new User();
                 user.Id = id;
-                if(id != null)
-                {
-                    db.Users.Remove(user);
-                }
+
+                db.Users.Remove(user);
                 db.SaveChanges();
-                return user;
             }
         }
 

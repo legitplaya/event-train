@@ -50,20 +50,30 @@ namespace event_train.Controllers
             }
         }*/
         [HttpPut(Name = "PutNews")]
-        public News PutNews(int id, DateTime startDate, DateTime endDate, string title, string content, int importance, DateTime created, string author)
+        public News PutNews(int id, DateTime startDate, DateTime endDate, string title, string content, int importance, string author)
         {
             startDate = DateTime.SpecifyKind(startDate, DateTimeKind.Utc);
             endDate = DateTime.SpecifyKind(endDate, DateTimeKind.Utc);
-            created = DateTime.SpecifyKind(created, DateTimeKind.Utc);
 
             using (ApplicationContext db = new ApplicationContext())
             {
-                News news = new News { Id = id, StartDate = startDate, EndDate = endDate, Title = title, Content = content, Importance = importance, Created = created, Author = author };
+                News news = new News { Id = id, StartDate = startDate, EndDate = endDate, Title = title, Content = content, Importance = importance, Created = DateTime.UtcNow, Author = author };
                 db.News.Add(news);
                 db.SaveChanges();
                 return news;
             }
 
+        }
+        [HttpDelete(Name = "DeleteNews")]
+        public void DeleteNews(int id)
+        {
+            News news = new News();
+            news.Id = id;
+            using(ApplicationContext db = new ApplicationContext())
+            {
+                db.News.Remove(news);
+                db.SaveChanges();
+            }
         }
     }
 }
