@@ -7,9 +7,12 @@ namespace event_train
         public DbSet<User> Users { get; set; }
         public DbSet<News> News { get; set; }
         public DbSet<MemorableDates> MemorableDates { get; set; }
-        public ApplicationContext(DbContextOptions<ApplicationContext> options) : base(options)
+
+        public ApplicationContext(DbContextOptions<ApplicationContext> options)
+            : base(options)
         {
-            Database.EnsureCreatedAsync();
+            /*Database.EnsureCreated();*/
+            Database.SetConnectionString("Host=localhost;Port=5432;Database=eventsService;Username=postgres;Password=123");
         }
     }
 }

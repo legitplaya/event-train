@@ -1,10 +1,15 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Linq.Expressions;
 
 namespace event_train.Controllers
 {
-    [ApiController]
-    [Route("[controller]")]
+    /*[ApiController]*/
+    [Route("api/[controller]")]
     public class NewsController : ControllerBase
     {
         private readonly ApplicationContext _db;
@@ -14,38 +19,42 @@ namespace event_train.Controllers
             _db = context;
         }
 
-        /*        private readonly ILogger<NewsController> _logger;
-                public NewsController(ILogger<NewsController> logger)
-                {
-                    _logger = logger;
-                }*/
-
-        [HttpGet(Name = "GetNews")]
-        public List<News> GetNews()
+        [HttpGet("date")]
+        public async Task<IActionResult> GetNewsByDate(string date)
         {
-            var news = _db.News.ToList();
-            return news;
+            var news = await _db.News
+                .Where(s => s.Created == DateOnly.Parse(date))
+                .ToListAsync();
+            return Ok(news);
         }
 
-        [HttpPut(Name = "PutNews")]
-        public void PutNews(int id, DateTime startDate, DateTime endDate, string title, string content, int importance, string author)
+        [HttpPost(Name = "PutNews")]
+        public async  Task<ActionResult> PutNews(int id, string startDate, string endDate, string title, string content, int importance, string author)
         {
-            startDate = DateTime.SpecifyKind(startDate, DateTimeKind.Utc);
-            endDate = DateTime.SpecifyKind(endDate, DateTimeKind.Utc);
-
-            News news = new News { Id = id, StartDate = startDate, EndDate = endDate, Title = title, Content = content, Importance = importance, Created = DateTime.UtcNow, Author = author };
+            News news = new News
+            {
+                Id = id,
+                StartDate = DateOnly.Parse(startDate),
+                EndDate = DateOnly.Parse(endDate),
+                Title = title,
+                Content = content,
+                Importance = importance,
+                Created = DateOnly.FromDateTime(DateTime.Now),
+                Author = author
+            };
             _db.News.Add(news);
-            _db.SaveChanges();
+            await _db.SaveChangesAsync();
+            return Ok(news);
         }
 
         [HttpDelete(Name = "DeleteNews")]
-        public void DeleteNews(int id)
+        public async Task<IActionResult> DeleteNews(int id)
         {
-            News news = new News();
-            news.Id = id;
+            News news = new News {Id = id };
 
             _db.News.Remove(news);
-            _db.SaveChanges();
+            await _db.SaveChangesAsync();
+            return NoContent();
         }
     }
 }

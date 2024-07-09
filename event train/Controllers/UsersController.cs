@@ -7,6 +7,7 @@ namespace event_train.Controllers
     [Route("[controller]")]
     public class UsersController : ControllerBase
     {
+
         private readonly ApplicationContext _db;
 
         public UsersController(ApplicationContext context)

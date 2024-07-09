@@ -16,17 +16,23 @@ namespace event_train.Controllers
         }
 
         [HttpGet(Name = "GetMemoDates")]
-        public List<MemorableDates> GetMemoDates()
+        public ActionResult<List<MemorableDates>> GetMemoDates()
         {
             var dates = _db.MemorableDates.ToList();
             return dates;
         }
-        [HttpPut(Name = "PutMemoDates")]
-        public void PutMemoDates(int id, DateTime eventDate, string notificationText, string author)
+        [HttpPut("{id}")]
+        public void PutMemoDates(int id, DateOnly eventDate, string notificationText, string author)
         {
-            eventDate = DateTime.SpecifyKind(eventDate, DateTimeKind.Utc);
+            MemorableDates MemoDates = new MemorableDates
+            {
+                Id = id,
+                EventDate = eventDate,
+                NotificationText = notificationText,
+                Created = DateOnly.FromDateTime(DateTime.Now),
+                Author = author
+            };
 
-            MemorableDates MemoDates = new MemorableDates { Id = id, EventDate = eventDate, NotificationText = notificationText, Created = DateTime.UtcNow, Author = author };
             _db.MemorableDates.Add(MemoDates);
             _db.SaveChanges();
         }
