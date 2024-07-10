@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 
 namespace event_train.Controllers
@@ -22,12 +23,19 @@ namespace event_train.Controllers
             return users;
         }
 
-        [HttpPut(Name = "PutUser")]
-        public void PutUser(int id, string login, string password)
+        [HttpPost("register")]
+        public async Task<IActionResult> Register(string login, string password)
         {
-            User user1 = new User { Id = id, Login = login, Password = password };
-            _db.Users.Add(user1);
-            _db.SaveChanges();
+            User user = new User {Login = login, Password = password};
+            if (_db.Users.Any(u => u.Login == user.Login))
+            {
+                return BadRequest("User already exists.");
+            }
+
+            _db.Users.Add(user);
+            await _db.SaveChangesAsync();
+
+            return Ok("User registered successfully.");
         }
         [HttpDelete(Name = "DeleteUser")]
         public void DeleteUser(int id)
@@ -37,6 +45,20 @@ namespace event_train.Controllers
 
             _db.Users.Remove(user);
             _db.SaveChanges();
+        }
+
+       
+
+        [HttpPost("login")]
+        public IActionResult Login(string? login, string? password)
+        {
+            var User = _db.Users.Where(u => u.Login == login && u.Password == password);
+            if (User == null)
+            {
+                return Unauthorized("Invalid login or password");
+            }
+
+            return Ok(new { Token = "token" }); // Здесь можно вернуть JWT токен при необходимости
         }
     }
 }

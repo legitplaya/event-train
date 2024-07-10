@@ -13,6 +13,8 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
+AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
 builder.Services.AddDbContext<ApplicationContext>(options =>
@@ -86,6 +88,7 @@ app.Map("/login/{username}", (string username) =>
 
     return new JwtSecurityTokenHandler().WriteToken(jwt);
 });
+
 
 app.Map("/data", [Authorize] (HttpContext context) => $"Hello World!");
 

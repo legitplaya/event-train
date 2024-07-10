@@ -22,11 +22,11 @@ namespace event_train.Controllers
             return dates;
         }
         [HttpPut("{id}")]
-        public void PutMemoDates(int id, DateOnly eventDate, string notificationText, string author)
+        public void PutMemoDates(DateOnly eventDate, string notificationText, string author)
         {
             MemorableDates MemoDates = new MemorableDates
             {
-                Id = id,
+                
                 EventDate = eventDate,
                 NotificationText = notificationText,
                 Created = DateOnly.FromDateTime(DateTime.Now),

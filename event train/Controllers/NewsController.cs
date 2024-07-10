@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using NpgsqlTypes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,7 +9,7 @@ using System.Linq.Expressions;
 
 namespace event_train.Controllers
 {
-    /*[ApiController]*/
+    [ApiController]
     [Route("api/[controller]")]
     public class NewsController : ControllerBase
     {
@@ -20,26 +21,26 @@ namespace event_train.Controllers
         }
 
         [HttpGet("date")]
-        public async Task<IActionResult> GetNewsByDate(string date)
+        public async Task<IActionResult> GetNewsByDate(DateTime date)
         {
             var news = await _db.News
-                .Where(s => s.Created == DateOnly.Parse(date))
+                .Where(s => s.Created == date)
                 .ToListAsync();
             return Ok(news);
         }
 
         [HttpPost(Name = "PutNews")]
-        public async  Task<ActionResult> PutNews(int id, string startDate, string endDate, string title, string content, int importance, string author)
+        public async Task<ActionResult> PutNews(DateTime startDate, DateTime endDate, string title, string content, int importance, string author)
         {
+       /*      2024/07/10 18:15:16          */
             News news = new News
             {
-                Id = id,
-                StartDate = DateOnly.Parse(startDate),
-                EndDate = DateOnly.Parse(endDate),
+                StartDate = startDate,
+                EndDate = endDate,
                 Title = title,
                 Content = content,
                 Importance = importance,
-                Created = DateOnly.FromDateTime(DateTime.Now),
+                Created = DateTime.Now,
                 Author = author
             };
             _db.News.Add(news);
