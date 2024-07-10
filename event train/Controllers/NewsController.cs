@@ -1,79 +1,61 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using NpgsqlTypes;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Linq.Expressions;
 
 namespace event_train.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("api/[controller]")]
     public class NewsController : ControllerBase
     {
+        private readonly ApplicationContext _db;
 
-        private readonly ILogger<NewsController> _logger;
-        public NewsController(ILogger<NewsController> logger)
+        public NewsController(ApplicationContext context)
         {
-            _logger = logger;
+            _db = context;
         }
 
-        /*[HttpGet(Name = "GetNews")]
-        public IEnumerable<News> Get(DateTime startDate, DateTime endDate, string title, string content, int importance, string author)
+        [HttpGet("date")]
+        public async Task<IActionResult> GetNewsByDate(DateTime date)
         {
-            return Enumerable.Range(1, 5).Select(index => new News
+            var news = await _db.News
+                .Where(s => s.Created == date)
+                .ToListAsync();
+            return Ok(news);
+        }
+
+        [HttpPost(Name = "PutNews")]
+        public async Task<ActionResult> PutNews(DateTime startDate, DateTime endDate, string title, string content, int importance, string author)
+        {
+       /*      2024/07/10 18:15:16          */
+            News news = new News
             {
                 StartDate = startDate,
-                EndDate = DateTime.Parse("2024-07-02T20:15:29.327Z"),
+                EndDate = endDate,
                 Title = title,
                 Content = content,
                 Importance = importance,
                 Created = DateTime.Now,
-                Author = author,
-            })
-            .ToArray();
-
-        }*/
-        [HttpGet(Name = "GetNews")]
-        public List<News> GetNews()
-        {
-            using (ApplicationContext db = new ApplicationContext())
-            {
-                var news = db.News.ToList();
-                return news;
-            }
+                Author = author
+            };
+            _db.News.Add(news);
+            await _db.SaveChangesAsync();
+            return Ok(news);
         }
-        /*[HttpPut(Name = "PutNews")]
-        public News PutUser(int id, DateTime startDate, DateTime endDate, string title, string content, int importance, string author)
-        {
-            using (ApplicationContext db = new ApplicationContext())
-            {
-                News news = new News { Id = id, StartDate = startDate, EndDate = endDate, Title = title, Content = content, Importance = importance, Created = DateTime.UtcNow, Author = author };
-                db.News.Add(news);
-                db.SaveChanges();
-                return news;
-            }
-        }*/
-        [HttpPut(Name = "PutNews")]
-        public News PutNews(int id, DateTime startDate, DateTime endDate, string title, string content, int importance, string author)
-        {
-            startDate = DateTime.SpecifyKind(startDate, DateTimeKind.Utc);
-            endDate = DateTime.SpecifyKind(endDate, DateTimeKind.Utc);
 
-            using (ApplicationContext db = new ApplicationContext())
-            {
-                News news = new News { Id = id, StartDate = startDate, EndDate = endDate, Title = title, Content = content, Importance = importance, Created = DateTime.UtcNow, Author = author };
-                db.News.Add(news);
-                db.SaveChanges();
-                return news;
-            }
-
-        }
         [HttpDelete(Name = "DeleteNews")]
-        public void DeleteNews(int id)
+        public async Task<IActionResult> DeleteNews(int id)
         {
-            News news = new News();
-            news.Id = id;
-            using(ApplicationContext db = new ApplicationContext())
-            {
-                db.News.Remove(news);
-                db.SaveChanges();
-            }
+            News news = new News {Id = id };
+
+            _db.News.Remove(news);
+            await _db.SaveChangesAsync();
+            return NoContent();
         }
     }
 }

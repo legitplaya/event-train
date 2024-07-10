@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using System.Security.Cryptography.X509Certificates;
+using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
 
 namespace event_train.Controllers
 {
@@ -7,52 +8,57 @@ namespace event_train.Controllers
     [Route("[controller]")]
     public class UsersController : ControllerBase
     {
+
+        private readonly ApplicationContext _db;
+
+        public UsersController(ApplicationContext context)
+        {
+            _db = context;
+        }
+
         [HttpGet(Name = "GetUsers")]
         public List<User> GetUsers()
         {
-            using (ApplicationContext db = new ApplicationContext())
-            {
-                var users = db.Users.ToList();
-                return users;
-            }
+            var users = _db.Users.ToList();
+            return users;
         }
 
-        [HttpPut(Name = "PutUser")]
-        public User PutUser(int id, string login, string password)
+        [HttpPost("register")]
+        public async Task<IActionResult> Register(string login, string password)
         {
-            using (ApplicationContext db = new ApplicationContext())
+            User user = new User {Login = login, Password = password};
+            if (_db.Users.Any(u => u.Login == user.Login))
             {
-                User user1 = new User { Id = id, Login = login, Password = password };
-                db.Users.Add(user1);
-                db.SaveChanges();
-                return user1;
+                return BadRequest("User already exists.");
             }
+
+            _db.Users.Add(user);
+            await _db.SaveChangesAsync();
+
+            return Ok("User registered successfully.");
         }
         [HttpDelete(Name = "DeleteUser")]
         public void DeleteUser(int id)
         {
-            using (ApplicationContext db = new ApplicationContext())
-            {
-                User user = new User();
-                user.Id = id;
+            User user = new User();
+            user.Id = id;
 
-                db.Users.Remove(user);
-                db.SaveChanges();
-            }
+            _db.Users.Remove(user);
+            _db.SaveChanges();
         }
 
-        /*[HttpPost(Name = "LoadUser")]
-        PublicKey 
-        using (ApplicationContext db = new ApplicationContext())
+       
+
+        [HttpPost("login")]
+        public IActionResult Login(string? login, string? password)
         {
-            User user1 = new User { Id = 1, Login = "Alice", Password = "Alice123" };
-            User user2 = new User { Id = 2, Login = "Rachel", Password = "123" };
+            var User = _db.Users.Where(u => u.Login == login && u.Password == password);
+            if (User == null)
+            {
+                return Unauthorized("Invalid login or password");
+            }
 
-            db.Users.AddRange(user1, user2);
-            db.SaveChanges();
-        }*/
-
-
-
+            return Ok(new { Token = "token" }); // Здесь можно вернуть JWT токен при необходимости
+        }
     }
 }

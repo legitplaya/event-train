@@ -1,4 +1,6 @@
-﻿namespace event_train
+﻿using NpgsqlTypes;
+
+namespace event_train
 {
     public class News
     {
@@ -10,9 +12,5 @@
         public int Importance { get; set; }
         public DateTime Created { get; set; }
         public string? Author { get; set; }
-        public News()
-        {
-            Created = DateTime.Now;
-        }
     }
 }
