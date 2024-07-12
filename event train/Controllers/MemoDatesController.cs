@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 
@@ -15,34 +16,43 @@ namespace event_train.Controllers
             _db = context;
         }
 
-        [HttpGet(Name = "GetMemoDates")]
-        public ActionResult<List<MemorableDates>> GetMemoDates()
+        [HttpGet("date")]
+        public async Task<ActionResult> GetMemoDates(DateTime date)
         {
-            var dates = _db.MemorableDates.ToList();
-            return dates;
+            var news = await _db.MemorableDates
+                .Where(s => s.EventDate == date)
+                .ToListAsync();
+
+            return Ok(news);
         }
-        [HttpPut("{id}")]
-        public void PutMemoDates(DateOnly eventDate, string notificationText, string author)
+
+        [HttpPut("id")]
+        [Authorize(Roles = "admin")]
+        public async Task<ActionResult> PutMemoDates(DateTime eventDate, string notificationText, string author)
         {
             MemorableDates MemoDates = new MemorableDates
             {
-                
                 EventDate = eventDate,
                 NotificationText = notificationText,
-                Created = DateOnly.FromDateTime(DateTime.Now),
+                Created = DateTime.Now,
                 Author = author
             };
 
             _db.MemorableDates.Add(MemoDates);
-            _db.SaveChanges();
+            await _db.SaveChangesAsync();
+
+            return Ok(MemoDates);
         }
-        [HttpDelete(Name = "DeleteMemoDates")]
-        public void DeleteMemoDates(int id)
+
+        [HttpDelete("{id}")]
+        [Authorize(Roles = "admin")]
+        public async Task<ActionResult> DeleteMemoDates(int id)
         {
-            MemorableDates MemoDates = new MemorableDates();
-            MemoDates.Id = id;
+            MemorableDates MemoDates = new MemorableDates {Id = id };
             _db.MemorableDates.Remove(MemoDates);
-            _db.SaveChanges();
+            await _db.SaveChangesAsync();
+
+            return NoContent();
         }
     }
 }

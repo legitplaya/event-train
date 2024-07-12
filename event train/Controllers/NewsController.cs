@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NpgsqlTypes;
@@ -20,19 +21,43 @@ namespace event_train.Controllers
             _db = context;
         }
 
-        [HttpGet("date")]
-        public async Task<IActionResult> GetNewsByDate(DateTime date)
+        [HttpGet("GetNews")]
+        public async Task<ActionResult<List<News>>> GetNews()
         {
-            var news = await _db.News
-                .Where(s => s.Created == date)
-                .ToListAsync();
-            return Ok(news);
+            var news = await _db.News.ToListAsync();
+            return news;
         }
 
-        [HttpPost(Name = "PutNews")]
+        [HttpGet("date")]
+        public async Task<ActionResult> GetNewsByDate(DateTime date)
+        {
+            var news = await _db.News
+                .Where(n => n.StartDate >= date && date <= n.EndDate)
+                .ToListAsync();
+            var memodates = await _db.MemorableDates
+                .Where(s => s.EventDate == date)
+                .Select(s => s.NotificationText)
+                .ToListAsync();
+
+            var combine = new Combine
+            {
+                News = news,
+                MemorableDates = memodates
+            };
+
+            return Ok(combine);
+        }
+        public class Combine
+        {
+            public List<News> News { get; set; }
+            public List<string> MemorableDates { get; set; }
+        }
+
+        [HttpPut(Name = "PutNews")]
+        [Authorize(Roles = "admin")]
         public async Task<ActionResult> PutNews(DateTime startDate, DateTime endDate, string title, string content, int importance, string author)
         {
-       /*      2024/07/10 18:15:16          */
+            /*      2020/02/02 00:00:00          */
             News news = new News
             {
                 StartDate = startDate,
@@ -49,9 +74,9 @@ namespace event_train.Controllers
         }
 
         [HttpDelete(Name = "DeleteNews")]
-        public async Task<IActionResult> DeleteNews(int id)
+        public async Task<ActionResult> DeleteNews(int id)
         {
-            News news = new News {Id = id };
+            News news = new News { Id = id };
 
             _db.News.Remove(news);
             await _db.SaveChangesAsync();
